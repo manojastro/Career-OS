@@ -150,6 +150,32 @@ has nothing that would accept it.
 
 ---
 
+## Deploying to Render
+
+`render.yaml` in the repo root is a Render Blueprint, so no settings need typing
+in by hand:
+
+1. Render dashboard → **New** → **Blueprint**
+2. Connect GitHub and grant access to this repo (it's private, so Render needs
+   explicit authorization), then select it
+3. **Apply** — Render reads the plan, region, build and start commands from the
+   blueprint
+
+The build command is `npm ci --include=dev && npm run build`. The `--include=dev`
+matters: Render sets `NODE_ENV=production`, which makes a plain `npm ci` skip
+devDependencies, and the Next.js build needs `typescript`, `tailwindcss`,
+`postcss` and `autoprefixer` from there.
+
+`AI_ENDPOINT_ACCESS_TOKEN` is generated automatically by Render. Read it from the
+service's Environment tab and enter it once in the portal's Settings screen to
+unlock the assistant. The three `AI_PROVIDER_*` variables can be left blank —
+the portal works fully without them and simply reports "AI not connected".
+
+Note the free plan sleeps after ~15 minutes idle, so the first request after a
+quiet period takes roughly 50 seconds to wake. Your records are unaffected by
+this: they live in your browser, not on the server, which also means a stranger
+who opens the public URL sees an empty app rather than your data.
+
 ## Setup
 
 ```bash

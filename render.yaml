@@ -1,0 +1,38 @@
+# Render Blueprint — deploy with: Render dashboard → New → Blueprint → pick this repo.
+# Render reads every setting below, so nothing has to be typed in by hand.
+services:
+  - type: web
+    name: career-transition-os
+    runtime: node
+    plan: free # No cost. Sleeps after ~15 min idle; first request then takes ~50s to wake.
+    region: singapore # Closest region to Asia/Kolkata.
+    branch: main
+    autoDeploy: true # Pushes to main redeploy automatically.
+
+    # `npm ci` alone would skip devDependencies when NODE_ENV=production, and the
+    # Next.js build genuinely needs typescript, tailwindcss, postcss and autoprefixer
+    # from there. --include=dev is what keeps the build from failing on a clean box.
+    buildCommand: npm ci --include=dev && npm run build
+    startCommand: npm start
+
+    healthCheckPath: /
+
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
+
+      # Gates /api/ai/* so a stranger who finds the URL can't spend your API credit.
+      # Render generates a strong random value; read it in the dashboard under
+      # Environment, then enter it once in the portal's Settings screen to unlock.
+      - key: AI_ENDPOINT_ACCESS_TOKEN
+        generateValue: true
+
+      # Optional — the portal is fully usable without these; the assistant simply
+      # reports "AI not connected". Leave blank now and fill them in later.
+      # Never commit real values here; set them in the Render dashboard.
+      - key: AI_PROVIDER_BASE_URL
+        sync: false
+      - key: AI_PROVIDER_API_KEY
+        sync: false
+      - key: AI_PROVIDER_MODEL
+        sync: false
