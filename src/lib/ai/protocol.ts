@@ -16,4 +16,8 @@ export interface ProviderToolSpec {
 export type ChatApiResponse =
   | { type: "message"; content: string }
   | { type: "tool_calls"; assistantMessage: ProviderMessage; toolCalls: { id: string; name: string; arguments: string }[] }
-  | { type: "error"; reason: "locked" | "not_configured" | "provider_error" | "bad_request" | "too_large"; message: string };
+  | {
+      type: "error";
+      reason: "locked" | "not_configured" | "provider_error" | "bad_request" | "too_large" | "rate_limited";
+      message: string;
+    };

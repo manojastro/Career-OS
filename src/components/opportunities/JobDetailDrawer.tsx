@@ -126,7 +126,7 @@ export function JobDetailDrawer({ open, onClose, job }: { open: boolean; onClose
             }
           />
           {!job.matchResult ? (
-            <p className="text-sm text-muted">Not matched yet. Click "Re-run match" once the JD text is saved.</p>
+            <p className="text-sm text-muted">Not matched yet. Click &quot;Re-run match&quot; once the JD text is saved.</p>
           ) : (
             <div className="space-y-3">
               {job.matchResult.jdCompleteness !== "complete" && (

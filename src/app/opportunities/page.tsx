@@ -158,10 +158,30 @@ export default function OpportunitiesPage() {
         </div>
       )}
 
-      <AddJobModal open={addJobOpen} onClose={() => setAddJobOpen(false)} />
-      <JobDetailDrawer key={selectedJob?.id ?? "none"} open={Boolean(selectedJob)} onClose={() => setSelectedJob(undefined)} job={selectedJob} />
-      <InterviewDrawer key={selectedInterview?.id ?? "new-interview"} open={interviewDrawerOpen || Boolean(selectedInterview)} onClose={() => { setInterviewDrawerOpen(false); setSelectedInterview(undefined); }} interview={selectedInterview} />
-      <ContactDrawer key={selectedContact?.id ?? "new-contact"} open={contactDrawerOpen || Boolean(selectedContact)} onClose={() => { setContactDrawerOpen(false); setSelectedContact(undefined); }} contact={selectedContact} />
+      {/* Mounted only while open so each form starts from the record it was opened for,
+          never from whatever was last edited in the same drawer. */}
+      {addJobOpen && <AddJobModal open onClose={() => setAddJobOpen(false)} />}
+      {selectedJob && <JobDetailDrawer open onClose={() => setSelectedJob(undefined)} job={selectedJob} />}
+      {(interviewDrawerOpen || selectedInterview) && (
+        <InterviewDrawer
+          open
+          onClose={() => {
+            setInterviewDrawerOpen(false);
+            setSelectedInterview(undefined);
+          }}
+          interview={selectedInterview}
+        />
+      )}
+      {(contactDrawerOpen || selectedContact) && (
+        <ContactDrawer
+          open
+          onClose={() => {
+            setContactDrawerOpen(false);
+            setSelectedContact(undefined);
+          }}
+          contact={selectedContact}
+        />
+      )}
     </div>
   );
 }

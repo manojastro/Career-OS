@@ -69,7 +69,7 @@ export function OnboardingModal() {
           <div className="mt-3 space-y-4">
             <h2 className="text-lg font-semibold text-ink">Welcome to Career Transition OS</h2>
             <p className="text-sm text-muted">
-              One place to know your next step, do the work, record the proof, and move toward the right AI role. Let's set a few basics —
+              One place to know your next step, do the work, record the proof, and move toward the right AI role. Let&apos;s set a few basics —
               everything here is editable later in Settings.
             </p>
             <div className="grid grid-cols-2 gap-3">

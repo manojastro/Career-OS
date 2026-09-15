@@ -44,7 +44,7 @@ export function FunnelPanel() {
         <p>Response rate: {funnel.responseRate}</p>
         <p>Interview rate: {funnel.interviewRate}</p>
       </div>
-      <p className="mt-2 text-xs text-muted">Small numbers don't support strong conclusions — treat early trends as directional, not predictive.</p>
+      <p className="mt-2 text-xs text-muted">Small numbers don&apos;t support strong conclusions — treat early trends as directional, not predictive.</p>
     </Card>
   );
 }

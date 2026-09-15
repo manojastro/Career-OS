@@ -33,7 +33,7 @@ export function WeeklyReviewPanel() {
       <div className="space-y-3">
         <Textarea label="What improved / what's holding you back" value={summary} onChange={(e) => setSummary(e.target.value)} rows={3} />
         <div>
-          <p className="mb-1 text-sm font-medium text-ink">Next week's three priorities</p>
+          <p className="mb-1 text-sm font-medium text-ink">Next week&apos;s three priorities</p>
           <div className="space-y-2">
             {priorities.map((p, i) => (
               <Input

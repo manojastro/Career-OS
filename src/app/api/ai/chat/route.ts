@@ -3,6 +3,7 @@ import { isRequestUnlocked } from "@/lib/ai/ownerAuth";
 import { callProvider, isProviderConfigured, ProviderMessage } from "@/lib/ai/providerAdapter";
 import { getToolSpecs } from "@/lib/ai/actions";
 import { buildSystemPrompt } from "@/lib/ai/systemPrompt";
+import { CHAT_RATE_LIMIT, checkRateLimit, clientKeyFrom } from "@/lib/ai/rateLimit";
 
 const MAX_MESSAGES = 40;
 const MAX_PAYLOAD_BYTES = 120_000;
@@ -10,6 +11,18 @@ const MAX_PAYLOAD_BYTES = 120_000;
 export async function POST(req: NextRequest) {
   if (!isRequestUnlocked()) {
     return NextResponse.json({ type: "error", reason: "locked", message: "Enter the owner passphrase in Settings first." }, { status: 401 });
+  }
+
+  const rate = checkRateLimit(CHAT_RATE_LIMIT, clientKeyFrom(req));
+  if (!rate.allowed) {
+    return NextResponse.json(
+      {
+        type: "error",
+        reason: "rate_limited",
+        message: `That's a lot of assistant requests at once. Try again in about ${rate.retryAfterSeconds}s — nothing was changed.`,
+      },
+      { status: 429, headers: { "Retry-After": String(rate.retryAfterSeconds) } }
+    );
   }
   if (!isProviderConfigured()) {
     return NextResponse.json({

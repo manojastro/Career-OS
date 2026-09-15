@@ -76,7 +76,7 @@ export function BackupPanel() {
       <SectionHeading title="Storage & backup" />
       <div className="text-sm text-muted">
         <p>
-          Your data lives only in this browser's local storage (about {storageSizeKb} KB used). It does not sync across devices and can be
+          Your data lives only in this browser&apos;s local storage (about {storageSizeKb} KB used). It does not sync across devices and can be
           lost if browser data is cleared — export a backup periodically.
         </p>
       </div>

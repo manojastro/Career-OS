@@ -451,6 +451,11 @@ export function undoAudit(state: AppState, auditId: string, ctx: CommandContext)
   const entry = state.auditLog.find((a) => a.id === auditId);
   if (!entry) throw new NotFoundError("audit", auditId);
   if (entry.undone) throw new ValidationError("This action was already undone.");
+  if (entry.trimmed) {
+    throw new ValidationError(
+      "This change is too far back in your history to undo automatically — its saved snapshot was cleared to free up storage. Edit the record directly instead."
+    );
+  }
   if (entry.entityType === ("profile" as any) || entry.entityId === "master") {
     throw new ValidationError("This kind of change can't be auto-undone. Edit the field back manually.");
   }

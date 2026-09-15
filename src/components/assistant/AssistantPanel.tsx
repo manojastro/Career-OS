@@ -86,8 +86,8 @@ export function AssistantPanel() {
           {state.chatMessages.length === 0 && (
             <div className="space-y-3">
               <p className="text-sm text-muted">
-                Ask me about your data, or tell me to add/update something. I only act through the portal's own data rules — I can't change
-                the app's code or layout.
+                Ask me about your data, or tell me to add/update something. I only act through the portal&apos;s own data rules — I can&apos;t change
+                the app&apos;s code or layout.
               </p>
               <div className="space-y-1.5">
                 {SUGGESTIONS.map((s) => (

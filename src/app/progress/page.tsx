@@ -39,7 +39,7 @@ export default function ProgressPage() {
     <div className="space-y-5">
       <div>
         <h1 className="text-xl font-semibold text-ink">Progress</h1>
-        <p className="text-sm text-muted">What improved, what's holding you back, what changes next week.</p>
+        <p className="text-sm text-muted">What improved, what&apos;s holding you back, what changes next week.</p>
       </div>
 
       <ReadinessCard roleId={primary} label="Primary" />

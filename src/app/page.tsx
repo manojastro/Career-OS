@@ -53,7 +53,7 @@ export default function TodayPage() {
             {availableHours}h available · focused on {ROLE_LABELS[state.profile.primaryRole]}
           </p>
           {plan.overdueCount > 0 && <p className="mt-1 text-sm text-warn">{plan.overdueCount} task(s) overdue — shown first below.</p>}
-          {plan.overCapacity && <p className="mt-1 text-sm text-warn">Today's top priorities exceed your available time. Consider moving one.</p>}
+          {plan.overCapacity && <p className="mt-1 text-sm text-warn">Today&apos;s top priorities exceed your available time. Consider moving one.</p>}
         </div>
       </Card>
 
@@ -115,10 +115,12 @@ export default function TodayPage() {
       <ProgressStrip />
       <CheckInCard />
 
-      <TaskDrawer open={taskDrawerOpen} onClose={() => setTaskDrawerOpen(false)} task={editingTask} />
-      <LogWorkModal open={logWorkOpen} onClose={() => setLogWorkOpen(false)} />
-      <QuickAddEvidenceModal open={addEvidenceOpen} onClose={() => setAddEvidenceOpen(false)} />
-      <AddJobModal open={addJobOpen} onClose={() => setAddJobOpen(false)} />
+      {/* Mounted only while open so each form starts from the record it was opened for,
+          never from whatever was last edited in the same drawer. */}
+      {taskDrawerOpen && <TaskDrawer open onClose={() => setTaskDrawerOpen(false)} task={editingTask} />}
+      {logWorkOpen && <LogWorkModal open onClose={() => setLogWorkOpen(false)} />}
+      {addEvidenceOpen && <QuickAddEvidenceModal open onClose={() => setAddEvidenceOpen(false)} />}
+      {addJobOpen && <AddJobModal open onClose={() => setAddJobOpen(false)} />}
     </div>
   );
 }

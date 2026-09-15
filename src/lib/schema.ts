@@ -407,6 +407,9 @@ export const AuditEntrySchema = z.object({
   summary: z.string(),
   undone: z.boolean().default(false),
   undoneAt: z.string().optional(),
+  /** True once before/after snapshots were dropped to reclaim storage; the entry stays
+   * readable as history but can no longer be auto-undone. */
+  trimmed: z.boolean().default(false),
 });
 export type AuditEntry = z.infer<typeof AuditEntrySchema>;
 

@@ -214,7 +214,8 @@ Test connection**.
 ## Test results
 
 ```
-npm test        # vitest — 43 tests, 7 files, all passing
+npm test         # vitest — 57 tests, 9 files, all passing
+npm run lint     # eslint (next/core-web-vitals) — clean
 npm run typecheck
 npm run build    # next build — compiles, typechecks, prerenders all routes
 ```
@@ -238,6 +239,14 @@ Coverage focuses on behavior, not implementation mirroring:
   "stakeholders") is treated as transferable/partial.
 - **`calc/planner.test.ts`** — overdue and blocked tasks outrank low-priority
   ones, and the plan never exceeds three priority slots.
+- **`domain/auditRetention.test.ts`** — a short audit log is left untouched,
+  recent entries stay fully undoable, older ones keep their summary but lose
+  their heavy snapshots, the log is hard-capped, pruning is idempotent, and
+  undoing a trimmed entry is refused rather than restoring a null snapshot.
+- **`ai/rateLimit.test.ts`** — requests are allowed up to the limit and
+  blocked after, budgets are separate per caller and per rule (chat traffic
+  can't lock you out of unlocking), the window frees up again on expiry, and
+  the proxy header is parsed to the first hop.
 - **`dateTime.test.ts`** — relative-date resolution ("tomorrow", "in 3 days",
   "next monday") against the Asia/Kolkata calendar, and an unresolvable
   phrase returns `null` instead of a guess.
@@ -268,6 +277,39 @@ duplicated "AI not connected" sentence in the assistant's fallback message.
 A third finding — that same-millisecond writes could produce identical
 `updatedAt` timestamps and defeat conflict detection — was caught by the
 vitest suite and fixed by making the shared timestamp helper monotonic.
+
+### Hardening pass (post-delivery review)
+
+A follow-up review found and fixed the following:
+
+- **Stale drawer state (data-loss class bug).** Task/Project/Skill drawers
+  seeded their form state from props but were never remounted, so opening
+  record B after record A showed A's values — and saving would have written
+  A's field values onto B. Reproduced in a real browser (opening "ALPHA"
+  displayed "BETA"), fixed by mounting drawers only while open, and
+  re-verified. This also fixes "Add task" reopening pre-filled with the
+  previously created task.
+- **Conditional `React.useId()`** in `Input`/`Textarea`/`Select` — a
+  rules-of-hooks violation (the hook was skipped whenever an explicit `id`
+  was passed), now always called.
+- **Unbounded audit log.** Every mutation stored full before/after copies of
+  the record; a job edit carries the whole JD and match result twice, so the
+  log would eventually exhaust the localStorage quota and block saves. Now
+  pruned: the last 50 entries stay fully undoable, older ones keep their
+  summary line but drop their snapshots, and the log is hard-capped at 500.
+  Undo refuses a trimmed entry with a clear explanation rather than
+  restoring an empty snapshot.
+- **Missing rate limits** (a spec requirement that had not been
+  implemented): `/api/ai/chat` is capped at 30 requests/minute per caller,
+  and passphrase attempts at 5 per 5 minutes, so the owner gate can't be
+  brute-forced in a loop.
+- **Keyboard accessibility.** Tab could previously escape an open drawer
+  into the page behind it. Drawers now trap focus, restore focus to the
+  triggering element on close, and confirm dialogs close on Escape and land
+  focus on Cancel (not the destructive button).
+- **ESLint was never actually configured** — `npm run lint` dropped into an
+  interactive setup prompt and checked nothing. Now wired to
+  `next/core-web-vitals` and passing clean.
 
 **What couldn't be run here:** a live call to a real LLM provider (no API key
 in this environment) — the `not_configured` path, the tool-calling loop

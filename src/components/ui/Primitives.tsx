@@ -59,7 +59,8 @@ export function Badge({
 }
 
 export function Input({ label, hint, error, id, className, ...props }: React.InputHTMLAttributes<HTMLInputElement> & { label?: string; hint?: string; error?: string }) {
-  const inputId = id || React.useId();
+  const generatedId = React.useId();
+  const inputId = id || generatedId;
   return (
     <label htmlFor={inputId} className="block text-sm">
       {label && <span className="mb-1 block font-medium text-ink">{label}</span>}
@@ -92,7 +93,8 @@ export function Textarea({
   className,
   ...props
 }: React.TextareaHTMLAttributes<HTMLTextAreaElement> & { label?: string; hint?: string; error?: string }) {
-  const inputId = id || React.useId();
+  const generatedId = React.useId();
+  const inputId = id || generatedId;
   return (
     <label htmlFor={inputId} className="block text-sm">
       {label && <span className="mb-1 block font-medium text-ink">{label}</span>}
@@ -120,7 +122,8 @@ export function Select({
   children,
   ...props
 }: React.SelectHTMLAttributes<HTMLSelectElement> & { label?: string; hint?: string }) {
-  const inputId = id || React.useId();
+  const generatedId = React.useId();
+  const inputId = id || generatedId;
   return (
     <label htmlFor={inputId} className="block text-sm">
       {label && <span className="mb-1 block font-medium text-ink">{label}</span>}

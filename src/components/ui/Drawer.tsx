@@ -4,6 +4,16 @@ import React, { useEffect, useRef } from "react";
 import { X } from "lucide-react";
 import { cx } from "@/lib/utils";
 
+const FOCUSABLE_SELECTOR =
+  'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
+
+function getFocusable(container: HTMLElement | null): HTMLElement[] {
+  if (!container) return [];
+  return Array.from(container.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR)).filter(
+    (el) => el.offsetParent !== null || el === document.activeElement
+  );
+}
+
 export function Drawer({
   open,
   onClose,
@@ -23,12 +33,40 @@ export function Drawer({
 
   useEffect(() => {
     if (!open) return;
+    const previouslyFocused = document.activeElement as HTMLElement | null;
+
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
+      if (e.key === "Escape") {
+        onClose();
+        return;
+      }
+      if (e.key !== "Tab") return;
+      // Keep keyboard focus inside the open drawer instead of letting it wander
+      // into the page behind it, which is unreachable to a mouse user anyway.
+      const focusables = getFocusable(panelRef.current);
+      if (focusables.length === 0) {
+        e.preventDefault();
+        panelRef.current?.focus();
+        return;
+      }
+      const first = focusables[0]!;
+      const last = focusables[focusables.length - 1]!;
+      const active = document.activeElement;
+      if (e.shiftKey && (active === first || active === panelRef.current)) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && active === last) {
+        e.preventDefault();
+        first.focus();
+      }
     };
+
     document.addEventListener("keydown", onKey);
     panelRef.current?.focus();
-    return () => document.removeEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      previouslyFocused?.focus?.();
+    };
   }, [open, onClose]);
 
   if (!open) return null;
@@ -81,6 +119,19 @@ export function ConfirmDialog({
   confirmLabel?: string;
   danger?: boolean;
 }) {
+  const cancelRef = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onCancel();
+    };
+    document.addEventListener("keydown", onKey);
+    // Land on Cancel, not Confirm — a stray Enter shouldn't delete anything.
+    cancelRef.current?.focus();
+    return () => document.removeEventListener("keydown", onKey);
+  }, [open, onCancel]);
+
   if (!open) return null;
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" onClick={onCancel}>
@@ -94,7 +145,7 @@ export function ConfirmDialog({
         <h3 className="text-base font-semibold text-ink">{title}</h3>
         <p className="mt-2 text-sm text-muted">{description}</p>
         <div className="mt-5 flex justify-end gap-2">
-          <button onClick={onCancel} className="rounded-lg border border-line px-3.5 py-2 text-sm font-medium hover:bg-black/5">
+          <button ref={cancelRef} onClick={onCancel} className="rounded-lg border border-line px-3.5 py-2 text-sm font-medium hover:bg-black/5">
             Cancel
           </button>
           <button

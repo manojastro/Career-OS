@@ -26,7 +26,39 @@ export function buildAudit(
     opId: ctx.opId,
     summary,
     undone: false,
+    trimmed: false,
   };
+}
+
+/** How many recent entries keep their full before/after snapshots (and stay undoable). */
+export const UNDOABLE_HISTORY_LIMIT = 50;
+/** Hard cap on retained audit entries; older ones are dropped entirely. */
+export const MAX_AUDIT_ENTRIES = 500;
+
+/**
+ * Keeps the audit log from growing without bound in browser storage. Every mutation
+ * records a full before/after copy of the record — a single job edit carries the whole
+ * JD text and match result twice — so an unpruned log would eventually exhaust the
+ * localStorage quota and block saves.
+ *
+ * Recent entries keep their snapshots so Undo keeps working. Older ones are flattened
+ * to a readable summary line, and the oldest are dropped past the hard cap.
+ */
+export function pruneAuditLog(state: AppState): AppState {
+  const log = state.auditLog;
+  if (log.length <= UNDOABLE_HISTORY_LIMIT) return state;
+
+  const capped = log.length > MAX_AUDIT_ENTRIES ? log.slice(log.length - MAX_AUDIT_ENTRIES) : log;
+  const firstUndoableIndex = capped.length - UNDOABLE_HISTORY_LIMIT;
+
+  let changed = capped.length !== log.length;
+  const pruned = capped.map((entry, index) => {
+    if (index >= firstUndoableIndex || entry.trimmed) return entry;
+    changed = true;
+    return { ...entry, before: null, after: null, trimmed: true };
+  });
+
+  return changed ? { ...state, auditLog: pruned } : state;
 }
 
 /** Returns a cached result if this opId was already applied and not since undone. */

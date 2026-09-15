@@ -5,6 +5,7 @@ import { AppState } from "@/lib/schema";
 import { loadState, saveState, subscribeExternalChanges } from "@/lib/storage/localStorageAdapter";
 import { nowISO } from "@/lib/dateTime";
 import { ConflictError, NotFoundError, ValidationError } from "@/lib/domain/errors";
+import { pruneAuditLog } from "@/lib/domain/helpers";
 import { newId } from "@/lib/ids";
 
 export type SaveStatus = "idle" | "saving" | "saved" | "error";
@@ -102,18 +103,19 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       throw e;
     }
     setSaveStatus("saving");
-    const saveResult = saveState(result.state);
+    const nextState = pruneAuditLog(result.state);
+    const saveResult = saveState(nextState);
     if (!saveResult.ok) {
       setSaveStatus("error");
       setSaveError(saveResult.error);
       pushToast("error", saveResult.error ?? "Could not save your change.");
       throw new Error(saveResult.error ?? "Save failed");
     }
-    stateRef.current = result.state;
-    setState(result.state);
+    stateRef.current = nextState;
+    setState(nextState);
     setSaveStatus("saved");
     setSaveError(undefined);
-    return result as any;
+    return { ...result, state: nextState } as any;
   }, [pushToast]);
 
   const replaceState = useCallback((next: AppState) => {
